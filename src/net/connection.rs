@@ -1,22 +1,31 @@
+use std::rc::Rc;
+
 use crate::net::*;
 
+#[derive(Debug)]
 pub enum ConnectionType {
     NORMAL, INHIBITOR, RESET
 }
 
-pub struct Connection<'a> {
-    place: &'a Place,
-    transition: &'a Transition,
+#[derive(Debug)]
+pub enum InputFrom {
+    PLACE, TRANSITION
+}
+
+#[derive(Debug)]
+pub struct Connection {
+    place: Rc<Place>,
+    transition: Rc<Transition>,
     weight: i32,
-    is_input: bool,
+    input_from: InputFrom,
     con_type: ConnectionType
 }
 
-impl<'a> Connection<'a> {
+impl Connection {
     /// Creates a new connection
-    pub fn new(place: &'a Place, transition: &'a Transition, weight: i32, is_input: bool, con_type: ConnectionType) -> Self {
+    pub fn new(place: Rc<Place>, transition: Rc<Transition>, weight: i32, input_from: InputFrom, con_type: ConnectionType) -> Self {
         Self {
-            place, transition, weight, is_input, con_type
+            place, transition, weight, input_from, con_type
         }
     }
 }

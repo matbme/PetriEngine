@@ -4,6 +4,6 @@ pub mod place;
 pub mod transition;
 
 pub use net::PetriNet;
-pub use connection::Connection;
+pub use connection::{Connection, ConnectionType, InputFrom};
 pub use place::Place;
 pub use transition::Transition;
