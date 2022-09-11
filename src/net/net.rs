@@ -83,8 +83,11 @@ macro_rules! petri_net {
     };
 
     (connections $var:ident ( $from:ident $($weight:literal)? -> $to:ident $($ctype:ident)? )) => {
+        #[allow(unused_mut, unused_assignments)]
         let mut con_type = crate::net::ConnectionType::NORMAL;
-        let mut weight: i32 = 1;
+
+        #[allow(unused_variables)]
+        let weight: i32 = 1;
 
         $(
             match stringify!($ctype) {
@@ -95,17 +98,19 @@ macro_rules! petri_net {
         )?
 
         $(
-            weight = $weight;
+            let weight = $weight;
         )?
 
         if let Some(place) = $var.place_with_name(stringify!($from)) {
             let input_from = crate::net::InputFrom::PLACE;
             let transition = $var.transition_with_name(stringify!($to)).expect("Transition does not exist");
+
             $var.add_connection(crate::net::Connection::new(place, transition, weight, input_from, con_type));
         } else {
             let input_from = crate::net::InputFrom::TRANSITION;
             let transition = $var.transition_with_name(stringify!($from)).expect("Transition does not exist");
             let place = $var.place_with_name(stringify!($to)).expect("Place does not exist");
+
             $var.add_connection(crate::net::Connection::new(place, transition, weight, input_from, con_type));
         }
     };

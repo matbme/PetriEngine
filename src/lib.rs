@@ -1,4 +1,10 @@
-mod net;
+//! # Overview
+//!
+//! This is a simple declarative implementation of a Petri Net engine.
+//!
+//! TODO: Documentation
+
+pub mod net;
 
 #[cfg(test)]
 mod tests {
@@ -15,6 +21,7 @@ mod tests {
         println!("{:?}", pn.places());
         println!("{:?}", pn.transitions());
         println!("{:?}", pn.connections());
+
         Ok(())
     }
 }
