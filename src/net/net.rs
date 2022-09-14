@@ -6,7 +6,7 @@ use crate::net::*;
 pub struct PetriNet{
     places: Vec<Rc<Place>>,
     transitions: Vec<Rc<Transition>>,
-    connections: Vec<Connection>,
+    connections: Vec<Rc<Connection>>,
 }
 
 impl PetriNet {
@@ -31,7 +31,7 @@ impl PetriNet {
 
     /// Adds `connection` to the net
     pub fn add_connection(&mut self, connection: Connection) {
-        self.connections.push(connection);
+        self.connections.push(Rc::new(connection));
     }
 
     /// Return a reference to `places`
@@ -45,7 +45,7 @@ impl PetriNet {
     }
 
     /// Return a reference to `connections`
-    pub fn connections(&self) -> &Vec<Connection> {
+    pub fn connections(&self) -> &Vec<Rc<Connection>> {
         &self.connections
     }
 

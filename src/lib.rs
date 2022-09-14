@@ -11,7 +11,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn simple_pn() -> Result<(), String>  {
+    fn declare_simple_pn() -> Result<(), String>  {
         let pn = petri_net! {
             places => P1, P2;
             transitions => T1;

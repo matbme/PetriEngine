@@ -1,9 +1,19 @@
+use super::Connectable;
+
 use uuid::Uuid;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash)]
 pub struct Transition {
     id: Uuid,
     name: String
+}
+
+impl Connectable for Transition { }
+
+impl PartialEq for Transition {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
 }
 
 impl Transition {
