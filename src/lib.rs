@@ -5,10 +5,12 @@
 //! TODO: Documentation
 
 pub mod net;
+pub mod ui;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ui::UITable;
 
     #[test]
     fn declare_simple_pn() -> Result<(), String>  {
@@ -18,7 +20,7 @@ mod tests {
             connections => (P1 -> T1 reset), (T1 2-> P2);
         };
 
-        println!("{:?}", pn.places());
+        pn.places().print_table();
         println!("{:?}", pn.transitions());
         println!("{:?}", pn.connections());
 

@@ -1,8 +1,10 @@
 use uuid::Uuid;
 
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use super::Connectable;
+use crate::ui::UITable;
 
 #[derive(Clone, Debug)]
 pub struct TokensInner(i32);
@@ -12,6 +14,22 @@ pub struct Place {
     id: Uuid,
     name: String,
     tokens: RefCell<TokensInner>,
+}
+
+impl UITable for Vec<Rc<Place>> {
+    fn header(&self) -> Vec<&str> {
+        vec!["Name", "Tokens"]
+    }
+
+    fn rows(&self) -> Vec<Vec<String>> {
+        let mut rows = vec![];
+
+        for elem in self {
+            rows.push(vec![elem.name().to_string(), elem.tokens.borrow().0.clone().to_string()])
+        }
+
+        rows
+    }
 }
 
 impl Connectable for Place { }
