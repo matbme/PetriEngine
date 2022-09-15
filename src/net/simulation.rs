@@ -22,6 +22,10 @@ impl Simulation {
         simul
     }
 
+    pub fn net(&self) -> &PetriNet {
+        &self.net
+    }
+
     /// Maps incoming and outpoing places for all transitions
     fn scan_connections(&mut self) {
         // Initialize keys
@@ -51,13 +55,13 @@ impl Simulation {
 
         match connection.connection_type() {
             super::ConnectionType::NORMAL => {
-                connection.weight() <= tokens
+                connection.weight() <= &tokens
             },
             super::ConnectionType::INHIBITOR => {
-                connection.weight() > tokens
+                connection.weight() > &tokens
             },
             super::ConnectionType::RESET => {
-                connection.weight() <= tokens
+                connection.weight() <= &tokens
             },
         }
     }
@@ -74,7 +78,29 @@ impl Simulation {
         true
     }
 
-    pub fn start(&self) {
+    /// Consume tokens from incoming places
+    fn consume_tokens(&self, transition: &Transition) {
+        if let Some(vals) = self.incoming_connections.get(transition) {
+            for (place, connection) in vals.iter() {
+                if connection.connection_type() == super::ConnectionType::RESET {
+                    place.clear_tokens();
+                } else {
+                    place.remove_tokens(connection.weight().clone());
+                }
+            }
+        }
+    }
+
+    /// Propagate tokens to outgoing places
+    fn propagate_tokens(&self, transition: &Transition) {
+        if let Some(vals) = self.outgoing_connections.get(transition) {
+            for (place, connection) in vals.iter() {
+                place.add_tokens(connection.weight().clone());
+            }
+        }
+    }
+
+    pub fn run(&self) {
         let mut some_transition_enabled = true;
 
         while some_transition_enabled {
@@ -83,6 +109,13 @@ impl Simulation {
             for transition in self.net.transitions() {
                 // Check if enabled
                 let enabled = self.transition_enabled(transition.as_ref());
+
+                if enabled {
+                    some_transition_enabled = true;
+
+                    self.consume_tokens(transition.as_ref());
+                    self.propagate_tokens(transition.as_ref());
+                }
             }
         }
     }

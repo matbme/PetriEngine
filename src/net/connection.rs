@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::net::*;
 use super::Connectable;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ConnectionType {
     NORMAL, INHIBITOR, RESET
 }
