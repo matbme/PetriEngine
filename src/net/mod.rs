@@ -10,4 +10,6 @@ pub use place::Place;
 pub use transition::Transition;
 pub use simulation::Simulation;
 
-pub trait Connectable { }
+pub trait Connectable {
+    fn connection_title(&self) -> &str;
+}

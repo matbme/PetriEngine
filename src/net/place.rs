@@ -32,7 +32,11 @@ impl UITable for Vec<Rc<Place>> {
     }
 }
 
-impl Connectable for Place { }
+impl Connectable for Place {
+    fn connection_title(&self) -> &str {
+        self.name()
+    }
+}
 
 impl Place {
     /// Creates a new place with given name

@@ -1,6 +1,9 @@
-use super::Connectable;
-
 use uuid::Uuid;
+
+use std::rc::Rc;
+
+use crate::ui::UITable;
+use super::Connectable;
 
 #[derive(Clone, Debug, Eq, Hash)]
 pub struct Transition {
@@ -8,11 +11,31 @@ pub struct Transition {
     name: String
 }
 
-impl Connectable for Transition { }
+impl Connectable for Transition {
+    fn connection_title(&self) -> &str {
+        self.name()
+    }
+}
 
 impl PartialEq for Transition {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
+    }
+}
+
+impl UITable for Vec<Rc<Transition>> {
+    fn header(&self) -> Vec<&str> {
+        vec!["Name"]
+    }
+
+    fn rows(&self) -> Vec<Vec<String>> {
+        let mut rows = vec![];
+
+        for elem in self {
+            rows.push(vec![elem.name().to_string()])
+        }
+
+        rows
     }
 }
 

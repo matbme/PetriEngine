@@ -21,8 +21,8 @@ mod tests {
         };
 
         pn.places().print_table();
-        println!("{:?}", pn.transitions());
-        println!("{:?}", pn.connections());
+        pn.transitions().print_table();
+        pn.connections().print_table();
 
         Ok(())
     }
@@ -37,16 +37,16 @@ mod tests {
 
         pn.places()[0].add_tokens(1); // TODO: Declarative way of adding tokens
 
-        println!("{:?}", pn.places());
-        println!("{:?}", pn.transitions());
-        println!("{:?}", pn.connections());
+        pn.places().print_table();
+        pn.transitions().print_table();
+        pn.connections().print_table();
 
         let simul = net::Simulation::new(pn);
         simul.run();
 
-        println!("{:?}", simul.net().places());
-        println!("{:?}", simul.net().transitions());
-        println!("{:?}", simul.net().connections());
+        simul.net().places().print_table();
+        simul.net().transitions().print_table();
+        simul.net().connections().print_table();
 
         Ok(())
     }

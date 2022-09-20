@@ -1,11 +1,22 @@
 use std::rc::Rc;
 
 use crate::net::*;
+use crate::ui::UITable;
 use super::Connectable;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ConnectionType {
     NORMAL, INHIBITOR, RESET
+}
+
+impl std::fmt::Display for ConnectionType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            ConnectionType::NORMAL => "Normal",
+            ConnectionType::INHIBITOR => "Inhibitor",
+            ConnectionType::RESET => "Reset",
+        })
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -20,6 +31,27 @@ pub struct Connection {
     weight: i32,
     input_from: InputFrom,
     con_type: ConnectionType,
+}
+
+impl UITable for Vec<Rc<Connection>> {
+    fn header(&self) -> Vec<&str> {
+        vec!["Input", "Output", "Weight", "Type"]
+    }
+
+    fn rows(&self) -> Vec<Vec<String>> {
+        let mut rows = vec![];
+
+        for elem in self {
+            rows.push(vec![
+                elem.input().connection_title().to_string(),
+                elem.output().connection_title().to_string(),
+                elem.weight().to_string(),
+                elem.connection_type().to_string()
+            ])
+        }
+
+        rows
+    }
 }
 
 impl Connection {
