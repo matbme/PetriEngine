@@ -1,12 +1,37 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
 use super::{Connection, PetriNet, Place, Transition};
+use crate::ui::UITable;
 
 pub struct Simulation {
     net: PetriNet,
     incoming_connections: HashMap<Rc<Transition>, Vec<(Rc<Place>, Rc<Connection>)>>,
-    outgoing_connections: HashMap<Rc<Transition>, Vec<(Rc<Place>, Rc<Connection>)>>
+    outgoing_connections: HashMap<Rc<Transition>, Vec<(Rc<Place>, Rc<Connection>)>>,
+
+    // Store a log of each step for printing
+    ui_rows: RefCell<Vec<Vec<String>>>,
+}
+
+impl UITable for Simulation {
+    fn header(&self) -> Vec<&str> {
+        let mut cols = vec!["Cycle"];
+
+        for place in self.net.places().iter() {
+            cols.push(place.name());
+        }
+
+        for transition in self.net.transitions().iter() {
+            cols.push(transition.name());
+        }
+
+        cols
+    }
+
+    fn rows(&self) -> Vec<Vec<String>> {
+        self.ui_rows.borrow().clone()
+    }
 }
 
 impl Simulation {
@@ -14,7 +39,8 @@ impl Simulation {
         let mut simul = Self {
             net,
             incoming_connections: HashMap::new(),
-            outgoing_connections: HashMap::new()
+            outgoing_connections: HashMap::new(),
+            ui_rows: RefCell::new(vec![])
         };
 
         simul.scan_connections();
@@ -61,7 +87,7 @@ impl Simulation {
                 connection.weight() > &tokens
             },
             super::ConnectionType::RESET => {
-                connection.weight() <= &tokens
+                true
             },
         }
     }
@@ -102,21 +128,39 @@ impl Simulation {
 
     pub fn run(&self) {
         let mut some_transition_enabled = true;
+        let mut cycle_count = -1;
 
         while some_transition_enabled {
-            // Scan transitions
+            cycle_count += 1;
             some_transition_enabled = false;
-            for transition in self.net.transitions() {
-                // Check if enabled
-                let enabled = self.transition_enabled(transition.as_ref());
 
-                if enabled {
+            // Add current places' marks to table
+            let mut places_marks = vec![];
+            for places in self.net.places() {
+                places_marks.push(places.tokens().to_string());
+            }
+
+            // Scan transitions and check if enabled
+            let mut transition_states = vec![];
+            for transition in self.net.transitions() {
+                transition_states.push(self.transition_enabled(transition.as_ref()));
+            }
+
+            for (i, transition) in self.net.transitions().iter().enumerate() {
+                if transition_states[i] {
                     some_transition_enabled = true;
 
                     self.consume_tokens(transition.as_ref());
                     self.propagate_tokens(transition.as_ref());
                 }
             }
+
+            // Insert cycle status into table
+            let mut table_row = vec![cycle_count.to_string()];
+            table_row.append(&mut places_marks);
+            table_row.append(&mut transition_states.into_iter().map(|tr| if tr { "X".to_string() } else { " ".to_string() }).collect());
+
+            self.ui_rows.borrow_mut().push(table_row.clone());
         }
     }
 }
