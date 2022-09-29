@@ -1,27 +1,34 @@
 use std::rc::Rc;
 
+use super::Connectable;
 use crate::net::*;
 use crate::ui::UITable;
-use super::Connectable;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ConnectionType {
-    NORMAL, INHIBITOR, RESET
+    NORMAL,
+    INHIBITOR,
+    RESET,
 }
 
 impl std::fmt::Display for ConnectionType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            ConnectionType::NORMAL => "Normal",
-            ConnectionType::INHIBITOR => "Inhibitor",
-            ConnectionType::RESET => "Reset",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                ConnectionType::NORMAL => "Normal",
+                ConnectionType::INHIBITOR => "Inhibitor",
+                ConnectionType::RESET => "Reset",
+            }
+        )
     }
 }
 
 #[derive(Clone, Debug)]
 pub enum InputFrom {
-    PLACE, TRANSITION
+    PLACE,
+    TRANSITION,
 }
 
 #[derive(Debug)]
@@ -46,7 +53,7 @@ impl UITable for Vec<Rc<Connection>> {
                 elem.input().connection_title().to_string(),
                 elem.output().connection_title().to_string(),
                 elem.weight().to_string(),
-                elem.connection_type().to_string()
+                elem.connection_type().to_string(),
             ])
         }
 
@@ -56,9 +63,19 @@ impl UITable for Vec<Rc<Connection>> {
 
 impl Connection {
     /// Creates a new connection
-    pub fn new(place: Rc<Place>, transition: Rc<Transition>, weight: i32, input_from: InputFrom, con_type: ConnectionType) -> Self {
+    pub fn new(
+        place: Rc<Place>,
+        transition: Rc<Transition>,
+        weight: i32,
+        input_from: InputFrom,
+        con_type: ConnectionType,
+    ) -> Self {
         Self {
-            place, transition, weight, input_from, con_type
+            place,
+            transition,
+            weight,
+            input_from,
+            con_type,
         }
     }
 

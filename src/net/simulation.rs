@@ -40,7 +40,7 @@ impl Simulation {
             net,
             incoming_connections: HashMap::new(),
             outgoing_connections: HashMap::new(),
-            ui_rows: RefCell::new(vec![])
+            ui_rows: RefCell::new(vec![]),
         };
 
         simul.scan_connections();
@@ -63,15 +63,19 @@ impl Simulation {
         for connection in self.net.connections().iter() {
             match connection.input_from() {
                 super::InputFrom::PLACE => {
-                    if let Some(places) = self.incoming_connections.get_mut(&connection.transition()) {
+                    if let Some(places) =
+                        self.incoming_connections.get_mut(&connection.transition())
+                    {
                         places.push((connection.place().clone(), connection.clone()));
                     }
-                },
+                }
                 super::InputFrom::TRANSITION => {
-                    if let Some(places) = self.outgoing_connections.get_mut(&connection.transition()) {
+                    if let Some(places) =
+                        self.outgoing_connections.get_mut(&connection.transition())
+                    {
                         places.push((connection.place().clone(), connection.clone()));
                     }
-                },
+                }
             }
         }
     }
@@ -80,15 +84,9 @@ impl Simulation {
         let tokens = place.tokens();
 
         match connection.connection_type() {
-            super::ConnectionType::NORMAL => {
-                connection.weight() <= &tokens
-            },
-            super::ConnectionType::INHIBITOR => {
-                connection.weight() > &tokens
-            },
-            super::ConnectionType::RESET => {
-                true
-            },
+            super::ConnectionType::NORMAL => connection.weight() <= &tokens,
+            super::ConnectionType::INHIBITOR => connection.weight() > &tokens,
+            super::ConnectionType::RESET => true,
         }
     }
 
@@ -158,7 +156,12 @@ impl Simulation {
             // Insert cycle status into table
             let mut table_row = vec![cycle_count.to_string()];
             table_row.append(&mut places_marks);
-            table_row.append(&mut transition_states.into_iter().map(|tr| if tr { "X".to_string() } else { " ".to_string() }).collect());
+            table_row.append(
+                &mut transition_states
+                    .into_iter()
+                    .map(|tr| if tr { "X".to_string() } else { " ".to_string() })
+                    .collect(),
+            );
 
             self.ui_rows.borrow_mut().push(table_row.clone());
         }

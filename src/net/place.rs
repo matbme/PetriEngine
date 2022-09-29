@@ -25,7 +25,10 @@ impl UITable for Vec<Rc<Place>> {
         let mut rows = vec![];
 
         for elem in self {
-            rows.push(vec![elem.name().to_string(), elem.tokens.borrow().0.clone().to_string()])
+            rows.push(vec![
+                elem.name().to_string(),
+                elem.tokens.borrow().0.clone().to_string(),
+            ])
         }
 
         rows
@@ -44,7 +47,7 @@ impl Place {
         Self {
             id: Uuid::new_v4(),
             name: name.into(),
-            tokens: RefCell::new(TokensInner(0))
+            tokens: RefCell::new(TokensInner(0)),
         }
     }
 

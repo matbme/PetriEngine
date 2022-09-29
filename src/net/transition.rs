@@ -2,13 +2,13 @@ use uuid::Uuid;
 
 use std::rc::Rc;
 
-use crate::ui::UITable;
 use super::Connectable;
+use crate::ui::UITable;
 
 #[derive(Clone, Debug, Eq, Hash)]
 pub struct Transition {
     id: Uuid,
-    name: String
+    name: String,
 }
 
 impl Connectable for Transition {
@@ -44,7 +44,7 @@ impl Transition {
     pub fn new(name: &str) -> Self {
         Self {
             id: Uuid::new_v4(),
-            name: name.into()
+            name: name.into(),
         }
     }
 

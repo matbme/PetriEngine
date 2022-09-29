@@ -1,5 +1,5 @@
-use comfy_table::*;
 use comfy_table::presets::UTF8_FULL;
+use comfy_table::*;
 
 pub trait UITable {
     /// Table header
@@ -11,9 +11,7 @@ pub trait UITable {
     fn print_table(&self) {
         let mut table = Table::new();
 
-        table
-            .load_preset(UTF8_FULL)
-            .set_header(self.header());
+        table.load_preset(UTF8_FULL).set_header(self.header());
 
         for row in self.rows() {
             table.add_row(row);

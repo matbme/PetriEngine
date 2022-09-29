@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::net::*;
 
 #[derive(Default)]
-pub struct PetriNet{
+pub struct PetriNet {
     places: Vec<Rc<Place>>,
     transitions: Vec<Rc<Transition>>,
     connections: Vec<Rc<Connection>>,
@@ -15,7 +15,7 @@ impl PetriNet {
         Self {
             places: vec![],
             transitions: vec![],
-            connections: vec![]
+            connections: vec![],
         }
     }
 
@@ -53,7 +53,7 @@ impl PetriNet {
     pub fn place_with_name(&self, name: &str) -> Option<Rc<Place>> {
         for place in self.places.iter() {
             if place.name() == name {
-                return Some(place.clone())
+                return Some(place.clone());
             }
         }
 
@@ -64,7 +64,7 @@ impl PetriNet {
     pub fn transition_with_name(&self, name: &str) -> Option<Rc<Transition>> {
         for transition in self.transitions.iter() {
             if transition.name() == name {
-                return Some(transition.clone())
+                return Some(transition.clone());
             }
         }
 
@@ -127,4 +127,3 @@ macro_rules! petri_net {
         }
     };
 }
-
