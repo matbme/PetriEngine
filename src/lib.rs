@@ -15,9 +15,9 @@ mod tests {
     #[test]
     fn declare_simple_pn() -> Result<(), String> {
         let pn = petri_net! {
-            places => [P1, P2];
-            transitions => [T1];
-            connections => [(P1 -> T1 reset), (T1 2-> P2)];
+            places => [P1, P2],
+            transitions => [T1],
+            connections => [(P1 -> T1 reset), (T1 2-> P2)]
         };
 
         pn.places().print_table();
@@ -30,8 +30,8 @@ mod tests {
     #[test]
     fn run_simulation() -> Result<(), String> {
         let pn = petri_net! {
-            places => [L1, L2, L3, L4, L5, L6, L7, L8];
-            transitions => [T1, T2, T3, T4];
+            places => [L1, L2, L3, L4, L5, L6, L7, L8],
+            transitions => [T1, T2, T3, T4],
             connections => [
                 (L1 -> T1),
                 (T1 -> L2),
@@ -47,7 +47,7 @@ mod tests {
                 (L3 2-> T2),
                 (T4 3-> L5),
                 (L5 3-> T2)
-            ];
+            ]
         };
 
         pn.places()[0].add_tokens(2); // TODO: Declarative way of adding tokens

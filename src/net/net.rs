@@ -115,7 +115,7 @@ macro_rules! petri_net {
         }
     };
 
-    ($( $decl:tt => [ $( $val:tt ),* ] ;)+) => {
+    ($( $decl:tt => [ $( $val:tt ),* ] ),+) => {
         {
             let mut new_net = crate::net::PetriNet::new();
 
