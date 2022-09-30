@@ -30,7 +30,7 @@ mod tests {
     #[test]
     fn run_simulation() -> Result<(), String> {
         let pn = petri_net! {
-            places => [L1, L2, L3, L4, L5, L6, L7, L8],
+            places => [L1<2>, L2, L3<2>, L4, L5<5>, L6, L7, L8],
             transitions => [T1, T2, T3, T4],
             connections => [
                 (L1 -> T1),
@@ -49,10 +49,6 @@ mod tests {
                 (L5 3-> T2)
             ]
         };
-
-        pn.places()[0].add_tokens(2); // TODO: Declarative way of adding tokens
-        pn.places()[2].add_tokens(2); // TODO: Declarative way of adding tokens
-        pn.places()[4].add_tokens(5); // TODO: Declarative way of adding tokens
 
         let simul = net::Simulation::new(pn);
         simul.run();

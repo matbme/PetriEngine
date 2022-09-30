@@ -74,8 +74,12 @@ impl PetriNet {
 
 #[macro_export]
 macro_rules! petri_net {
-    (places $var:ident $name:ident) => {
-        $var.add_place(crate::net::Place::new(stringify!($name)));
+    (places $var:ident $name:ident $($tokens:literal)?) => {
+        let place = crate::net::Place::new(stringify!($name));
+
+        $( place.add_tokens($tokens); )?
+
+        $var.add_place(place);
     };
 
     (transitions $var:ident $name:ident) => {
@@ -115,12 +119,12 @@ macro_rules! petri_net {
         }
     };
 
-    ($( $decl:tt => [ $( $val:tt ),* ] ),+) => {
+    ($( $decl:tt => [ $( $val:tt $(< $tokens:literal >)? ),* ] ),+) => {
         {
             let mut new_net = crate::net::PetriNet::new();
 
             $(
-                $( petri_net!($decl new_net $val); )+
+                $( petri_net!($decl new_net $val $($tokens)?); )+
             )+
 
             new_net
