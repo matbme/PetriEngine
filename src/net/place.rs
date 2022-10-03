@@ -9,7 +9,7 @@ use crate::ui::UITable;
 #[derive(Clone, Debug)]
 pub struct TokensInner(i32);
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Place {
     id: Uuid,
     name: String,

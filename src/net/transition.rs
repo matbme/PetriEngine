@@ -1,14 +1,24 @@
+use derivative::Derivative;
 use uuid::Uuid;
 
 use std::rc::Rc;
 
-use super::Connectable;
+use super::{Connectable, ConnectionMap};
 use crate::ui::UITable;
 
-#[derive(Clone, Debug, Eq, Hash)]
+// Callbacks for Transition receive a reference for the `Transition`, as well as references to the
+// `HashMap` expressing the net graph.
+type TransitionCallback = Box<dyn Fn(&Transition, &ConnectionMap, &ConnectionMap)>;
+
+#[derive(Derivative)]
+#[derivative(Debug, Eq, Hash)]
 pub struct Transition {
     id: Uuid,
     name: String,
+
+    #[derivative(Hash = "ignore")]
+    #[derivative(Debug = "ignore")]
+    callback: Option<TransitionCallback>,
 }
 
 impl Connectable for Transition {
@@ -45,10 +55,19 @@ impl Transition {
         Self {
             id: Uuid::new_v4(),
             name: name.into(),
+            callback: None,
         }
     }
 
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn callback(&self) -> Option<&TransitionCallback> {
+        self.callback.as_ref()
+    }
+
+    pub fn add_callback(&mut self, callback: TransitionCallback) -> Option<TransitionCallback> {
+        self.callback.replace(callback)
     }
 }

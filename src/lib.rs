@@ -31,7 +31,11 @@ mod tests {
     fn run_simulation() -> Result<(), String> {
         let pn = petri_net! {
             places => [L1<2>, L2, L3<2>, L4, L5<5>, L6, L7, L8],
-            transitions => [T1, T2, T3, T4],
+            transitions => [T1 -> |t, incoming, outgoing| {
+                println!("{:?}", t);
+                println!("{:?}", incoming);
+                println!("{:?}", outgoing);
+            }, T2, T3, T4],
             connections => [
                 (L1 -> T1),
                 (T1 -> L2),

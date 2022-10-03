@@ -82,8 +82,13 @@ macro_rules! petri_net {
         $var.add_place(place);
     };
 
-    (transitions $var:ident $name:ident) => {
-        $var.add_transition(crate::net::Transition::new(stringify!($name)));
+    (transitions $var:ident $name:ident $(-> |$tr:ident, $inc:ident, $out:ident| $callback:tt)?) => {
+        #[allow(unused_mut)]
+        let mut transition = crate::net::Transition::new(stringify!($name));
+
+        $( transition.add_callback(Box::new(|$tr, $inc, $out| $callback)); )?
+
+        $var.add_transition(transition);
     };
 
     (connections $var:ident ( $from:ident $($weight:literal)? -> $to:ident $($ctype:ident)? )) => {
@@ -119,12 +124,12 @@ macro_rules! petri_net {
         }
     };
 
-    ($( $decl:tt => [ $( $val:tt $(< $tokens:literal >)? ),* ] ),+) => {
+    ($( $decl:tt => [ $( $val:tt $(< $tokens:literal >)? $(-> |$tr:ident, $inc:ident, $out:ident| $callback:tt)? ),* ] ),+) => {
         {
             let mut new_net = crate::net::PetriNet::new();
 
             $(
-                $( petri_net!($decl new_net $val $($tokens)?); )+
+                $( petri_net!($decl new_net $val $($tokens)? $(-> |$tr, $inc, $out| $callback)? ); )+
             )+
 
             new_net

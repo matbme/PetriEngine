@@ -5,10 +5,13 @@ use std::rc::Rc;
 use super::{Connection, PetriNet, Place, Transition};
 use crate::ui::UITable;
 
+// A `Transition` (key) connects to a `Place` via a `Connection` (value tuple)
+pub type ConnectionMap = HashMap<Rc<Transition>, Vec<(Rc<Place>, Rc<Connection>)>>;
+
 pub struct Simulation {
     net: PetriNet,
-    incoming_connections: HashMap<Rc<Transition>, Vec<(Rc<Place>, Rc<Connection>)>>,
-    outgoing_connections: HashMap<Rc<Transition>, Vec<(Rc<Place>, Rc<Connection>)>>,
+    incoming_connections: ConnectionMap,
+    outgoing_connections: ConnectionMap,
 
     // Store a log of each step for printing
     ui_rows: RefCell<Vec<Vec<String>>>,
@@ -147,6 +150,13 @@ impl Simulation {
             for (i, transition) in self.net.transitions().iter().enumerate() {
                 if transition_states[i] {
                     some_transition_enabled = true;
+                    if let Some(callback) = transition.callback() {
+                        callback(
+                            &transition,
+                            &self.incoming_connections,
+                            &self.outgoing_connections,
+                        );
+                    }
 
                     self.consume_tokens(transition.as_ref());
                     self.propagate_tokens(transition.as_ref());

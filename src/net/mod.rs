@@ -7,7 +7,7 @@ pub mod transition;
 pub use connection::{Connection, ConnectionType, InputFrom};
 pub use net::PetriNet;
 pub use place::Place;
-pub use simulation::Simulation;
+pub use simulation::{ConnectionMap, Simulation};
 pub use transition::Transition;
 
 pub trait Connectable {
