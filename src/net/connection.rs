@@ -25,7 +25,7 @@ impl std::fmt::Display for ConnectionType {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum InputFrom {
     PLACE,
     TRANSITION,
@@ -38,6 +38,14 @@ pub struct Connection {
     weight: i32,
     input_from: InputFrom,
     con_type: ConnectionType,
+}
+
+impl PartialEq for Connection {
+    fn eq(&self, other: &Self) -> bool {
+        self.place == other.place() &&
+        self.transition() == other.transition() &&
+        self.weight == other.weight().clone()
+    }
 }
 
 impl UITable for Vec<Rc<Connection>> {

@@ -1,3 +1,4 @@
+use derivative::Derivative;
 use uuid::Uuid;
 
 use std::cell::RefCell;
@@ -9,11 +10,20 @@ use crate::ui::UITable;
 #[derive(Clone, Debug)]
 pub struct TokensInner(i32);
 
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug, Eq, Hash)]
 pub struct Place {
     id: Uuid,
     name: String,
+
+    #[derivative(Hash = "ignore")]
     tokens: RefCell<TokensInner>,
+}
+
+impl PartialEq for Place {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
 }
 
 impl UITable for Vec<Rc<Place>> {

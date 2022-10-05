@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 comfy-table = "6.1.0"
 derivative = "2.2.0"
+rand = "0.8.5"
 
 [dependencies.uuid]
 features = [

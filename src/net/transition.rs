@@ -63,6 +63,10 @@ impl Transition {
         &self.name
     }
 
+    pub fn id(&self) -> &Uuid {
+        &self.id
+    }
+
     pub fn callback(&self) -> Option<&TransitionCallback> {
         self.callback.as_ref()
     }

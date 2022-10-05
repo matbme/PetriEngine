@@ -29,6 +29,8 @@ mod tests {
 
     #[test]
     fn run_simulation() -> Result<(), String> {
+        let start = std::time::Instant::now();
+
         let pn = petri_net! {
             places => [L1<2>, L2, L3<2>, L4, L5<5>, L6, L7, L8],
             transitions => [T1 -> |t, incoming, outgoing| {
@@ -56,6 +58,30 @@ mod tests {
 
         let simul = net::Simulation::new(pn);
         simul.run();
+
+        let end = std::time::Instant::now();
+
+        simul.print_table();
+
+        println!("Elapsed time: {:?}", end - start);
+
+        Ok(())
+    }
+
+    #[test]
+    fn concurrency_check() -> Result<(), String> {
+        let pn = petri_net! {
+            places => [L1<1>],
+            transitions => [T1, T2],
+            connections => [
+                (L1 -> T1),
+                (L1 -> T2)
+            ]
+        };
+
+        let simul = net::Simulation::new(pn);
+        simul.run();
+
         simul.print_table();
 
         Ok(())
