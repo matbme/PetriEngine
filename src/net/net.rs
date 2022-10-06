@@ -75,7 +75,7 @@ impl PetriNet {
 #[macro_export]
 macro_rules! connection_type {
     (->) => { crate::net::ConnectionType::NORMAL };
-    (-@) => { crate::net::ConnectionType::INHIBITOR };
+    (@) => { crate::net::ConnectionType::INHIBITOR };
     (>>) => { crate::net::ConnectionType::RESET };
 }
 

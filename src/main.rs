@@ -4,7 +4,7 @@ fn main() {
     let pn = petri_net! {
         places => [L1<2>, L2, L3<2>, L4, L5<5>, L6, L7, L8],
         transitions => [T1 -> |t, _, _| {
-                println!("T1 is active and has ID {}", t.id());
+            println!("T1 is active and has ID {}", t.id());
         }, T2, T3, T4],
         connections => [
             (2) L1 -> T1,
