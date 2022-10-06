@@ -74,63 +74,65 @@ impl PetriNet {
 
 #[macro_export]
 macro_rules! petri_net {
-    (places $var:ident $name:ident $($tokens:literal)?) => {
-        let place = crate::net::Place::new(stringify!($name));
-
-        $( place.add_tokens($tokens); )?
-
-        $var.add_place(place);
-    };
-
-    (transitions $var:ident $name:ident $(-> |$tr:ident, $inc:ident, $out:ident| $callback:tt)?) => {
-        #[allow(unused_mut)]
-        let mut transition = crate::net::Transition::new(stringify!($name));
-
-        $( transition.add_callback(Box::new(|$tr, $inc, $out| $callback)); )?
-
-        $var.add_transition(transition);
-    };
-
-    (connections $var:ident ( $from:ident $($weight:literal)? -> $to:ident $($ctype:ident)? )) => {
-        #[allow(unused_mut, unused_assignments)]
-        let mut con_type = crate::net::ConnectionType::NORMAL;
-
-        #[allow(unused_variables)]
-        let weight: i32 = 1;
-
+    (places $var:ident [ $($name:ident $(< $tokens:literal >)?),+ ]) => {
         $(
-            match stringify!($ctype) {
-                "inhibitor" => con_type = crate::net::ConnectionType::INHIBITOR,
-                "reset" => con_type = crate::net::ConnectionType::RESET,
-                _ => unimplemented!()
+            let place = crate::net::Place::new(stringify!($name));
+            $( place.add_tokens($tokens); )?
+            $var.add_place(place);
+        )+
+    };
+
+    (transitions $var:ident [ $($name:ident $(-> |$tr:pat_param, $inc:pat_param, $out:pat_param| $callback:block)?),+ ]) => {
+        $(
+            #[allow(unused_mut)]
+            let mut transition = crate::net::Transition::new(stringify!($name));
+
+            $( transition.add_callback(Box::new(|$tr, $inc, $out| $callback)); )?
+
+            $var.add_transition(transition);
+        )+
+    };
+
+    (connections $var:ident [ $(( $from:ident $($weight:literal)? -> $to:ident $($ctype:ident)? )),+ ]) => {
+        $(
+            #[allow(unused_mut, unused_assignments)]
+            let mut con_type = crate::net::ConnectionType::NORMAL;
+
+            #[allow(unused_variables)]
+            let weight: i32 = 1;
+
+            $(
+                match stringify!($ctype) {
+                    "inhibitor" => con_type = crate::net::ConnectionType::INHIBITOR,
+                    "reset" => con_type = crate::net::ConnectionType::RESET,
+                    _ => unimplemented!()
+                }
+            )?
+
+            $(
+                let weight = $weight;
+            )?
+
+            if let Some(place) = $var.place_with_name(stringify!($from)) {
+                let input_from = crate::net::InputFrom::PLACE;
+                let transition = $var.transition_with_name(stringify!($to)).expect("Transition does not exist");
+
+                $var.add_connection(crate::net::Connection::new(place, transition, weight, input_from, con_type));
+            } else {
+                let input_from = crate::net::InputFrom::TRANSITION;
+                let transition = $var.transition_with_name(stringify!($from)).expect("Transition does not exist");
+                let place = $var.place_with_name(stringify!($to)).expect("Place does not exist");
+
+                $var.add_connection(crate::net::Connection::new(place, transition, weight, input_from, con_type));
             }
-        )?
-
-        $(
-            let weight = $weight;
-        )?
-
-        if let Some(place) = $var.place_with_name(stringify!($from)) {
-            let input_from = crate::net::InputFrom::PLACE;
-            let transition = $var.transition_with_name(stringify!($to)).expect("Transition does not exist");
-
-            $var.add_connection(crate::net::Connection::new(place, transition, weight, input_from, con_type));
-        } else {
-            let input_from = crate::net::InputFrom::TRANSITION;
-            let transition = $var.transition_with_name(stringify!($from)).expect("Transition does not exist");
-            let place = $var.place_with_name(stringify!($to)).expect("Place does not exist");
-
-            $var.add_connection(crate::net::Connection::new(place, transition, weight, input_from, con_type));
-        }
+        )+
     };
 
-    ($( $decl:tt => [ $( $val:tt $(< $tokens:literal >)? $(-> |$tr:ident, $inc:ident, $out:ident| $callback:tt)? ),* ] ),+) => {
+    ($( $decl:tt => $vals:tt ),+) => {
         {
             let mut new_net = crate::net::PetriNet::new();
 
-            $(
-                $( petri_net!($decl new_net $val $($tokens)? $(-> |$tr, $inc, $out| $callback)? ); )+
-            )+
+            $( petri_net!($decl new_net $vals); )+
 
             new_net
         }
