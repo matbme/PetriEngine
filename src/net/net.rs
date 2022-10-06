@@ -93,37 +93,37 @@ macro_rules! petri_net {
         )+
     };
 
-    (connections $var:ident [ $(( $from:ident $($weight:literal)? -> $to:ident $($ctype:ident)? )),+ ]) => {
+    (connections $var:ident [ $( $(( $weight:literal ))? $from:ident $ctype:tt $to:ident ),+ ]) => {
         $(
-            #[allow(unused_mut, unused_assignments)]
-            let mut con_type = crate::net::ConnectionType::NORMAL;
+            let con_type = match stringify!($ctype) {
+                "->" => crate::net::ConnectionType::NORMAL,
+                "-@" => crate::net::ConnectionType::INHIBITOR,
+                ">>" => crate::net::ConnectionType::RESET,
+                _ => panic!("Invalid connection type")
+            };
 
             #[allow(unused_variables)]
             let weight: i32 = 1;
-
-            $(
-                match stringify!($ctype) {
-                    "inhibitor" => con_type = crate::net::ConnectionType::INHIBITOR,
-                    "reset" => con_type = crate::net::ConnectionType::RESET,
-                    _ => unimplemented!()
-                }
-            )?
-
-            $(
-                let weight = $weight;
-            )?
+            $( let weight = $weight; )?
 
             if let Some(place) = $var.place_with_name(stringify!($from)) {
                 let input_from = crate::net::InputFrom::PLACE;
-                let transition = $var.transition_with_name(stringify!($to)).expect("Transition does not exist");
+                let transition = $var.transition_with_name(stringify!($to))
+                    .expect("Transition does not exist");
 
-                $var.add_connection(crate::net::Connection::new(place, transition, weight, input_from, con_type));
+                $var.add_connection(
+                    crate::net::Connection::new(place, transition, weight, input_from, con_type)
+                );
             } else {
                 let input_from = crate::net::InputFrom::TRANSITION;
-                let transition = $var.transition_with_name(stringify!($from)).expect("Transition does not exist");
-                let place = $var.place_with_name(stringify!($to)).expect("Place does not exist");
+                let transition = $var.transition_with_name(stringify!($from))
+                    .expect("Transition does not exist");
+                let place = $var.place_with_name(stringify!($to))
+                    .expect("Place does not exist");
 
-                $var.add_connection(crate::net::Connection::new(place, transition, weight, input_from, con_type));
+                $var.add_connection(
+                    crate::net::Connection::new(place, transition, weight, input_from, con_type)
+                );
             }
         )+
     };

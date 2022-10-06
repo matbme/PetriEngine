@@ -17,7 +17,7 @@ mod tests {
         let pn = petri_net! {
             places => [P1, P2],
             transitions => [T1],
-            connections => [(P1 -> T1 reset), (T1 2-> P2)]
+            connections => [P1 >> T1, (2) T1 -> P2]
         };
 
         pn.places().print_table();
@@ -37,20 +37,20 @@ mod tests {
                 println!("T1 is active and has ID {}", t.id());
             }, T2, T3, T4],
             connections => [
-                (L1 -> T1),
-                (T1 -> L2),
-                (L2 -> T2),
-                (T2 -> L4),
-                (L4 -> T3),
-                (T3 -> L7),
-                (T3 -> L6),
-                (L7 -> T4),
-                (L6 -> T4),
-                (T4 -> L8),
-                (T3 2-> L3),
-                (L3 2-> T2),
-                (T4 3-> L5),
-                (L5 3-> T2)
+                L1 -> T1,
+                T1 -> L2,
+                L2 -> T2,
+                T2 -> L4,
+                L4 -> T3,
+                T3 -> L7,
+                T3 -> L6,
+                L7 -> T4,
+                L6 -> T4,
+                T4 -> L8,
+                (2) T3 -> L3,
+                (2) L3 -> T2,
+                (3) T4 -> L5,
+                (3) L5 -> T2
             ]
         };
 
@@ -72,8 +72,8 @@ mod tests {
             places => [L1<1>],
             transitions => [T1, T2],
             connections => [
-                (L1 -> T1),
-                (L1 -> T2)
+                L1 -> T1,
+                L1 -> T2
             ]
         };
 
