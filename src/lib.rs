@@ -33,10 +33,8 @@ mod tests {
 
         let pn = petri_net! {
             places => [L1<2>, L2, L3<2>, L4, L5<5>, L6, L7, L8],
-            transitions => [T1 -> |t, incoming, outgoing| {
-                println!("{:?}", t);
-                println!("{:?}", incoming);
-                println!("{:?}", outgoing);
+            transitions => [T1 -> |t, _, _| {
+                println!("T1 is active and has ID {}", t.id());
             }, T2, T3, T4],
             connections => [
                 (L1 -> T1),
