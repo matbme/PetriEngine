@@ -169,10 +169,12 @@ impl Simulation {
     fn consume_tokens(&self, transition: &Transition, incoming_connections: &ConnectionMap) {
         if let Some(vals) = incoming_connections.get(transition) {
             for (place, connection) in vals.iter() {
-                if connection.connection_type() == super::ConnectionType::RESET {
-                    place.clear_tokens();
-                } else {
-                    place.remove_tokens(connection.weight().clone());
+                match connection.connection_type() {
+                    super::ConnectionType::NORMAL => {
+                        place.remove_tokens(connection.weight().clone())
+                    }
+                    super::ConnectionType::INHIBITOR => {}
+                    super::ConnectionType::RESET => place.clear_tokens(),
                 }
             }
         }
