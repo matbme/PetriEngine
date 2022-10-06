@@ -255,26 +255,29 @@ impl Simulation {
                     enabled_transitions.push(transition.clone());
                 }
             }
+            println!("{:?}", enabled_transitions);
 
             // Choose path for concurrent connections
             let mut rng = rand::thread_rng();
             let mut unconcurrent_incoming_connections = self.incoming_connections.clone();
             for (_, connections) in self.concurrent_connections.iter() {
-                let disable_cons = connections
-                    .into_iter()
-                    .filter(|con| enabled_transitions.contains(&con.transition()))
-                    .choose_multiple(&mut rng, connections.len() - 1);
+                if enabled_transitions.len() > 1 {
+                    let disable_cons = connections
+                        .into_iter()
+                        .filter(|con| enabled_transitions.contains(&con.transition()))
+                        .choose_multiple(&mut rng, connections.len() - 1);
 
-                for connection in disable_cons.iter() {
-                    unconcurrent_incoming_connections
-                        .get_mut(&connection.transition())
-                        .expect("Incoming connections map was not properly initialized")
-                        .retain(|(_, map_connection)| {
-                            map_connection.as_ref() != connection.as_ref()
-                        });
+                    for connection in disable_cons.iter() {
+                        unconcurrent_incoming_connections
+                            .get_mut(&connection.transition())
+                            .expect("Incoming connections map was not properly initialized")
+                            .retain(|(_, map_connection)| {
+                                map_connection.as_ref() != connection.as_ref()
+                            });
 
-                    enabled_transitions
-                        .retain(|tr| tr.id() != connection.transition().as_ref().id());
+                        enabled_transitions
+                            .retain(|tr| tr.id() != connection.transition().as_ref().id());
+                    }
                 }
             }
 
