@@ -143,20 +143,19 @@ impl Simulation {
         });
     }
 
-    fn place_matches_requirement(&self, place: &Place, connection: &Connection) -> bool {
-        let tokens = place.tokens();
-
-        match connection.connection_type() {
-            super::ConnectionType::NORMAL => connection.weight() <= &tokens,
-            super::ConnectionType::INHIBITOR => connection.weight() > &tokens,
-            super::ConnectionType::RESET => true,
-        }
-    }
-
+    // Check whether the transition is enabled
     fn transition_enabled(&self, transition: &Transition) -> bool {
         if let Some(vals) = self.incoming_connections.get(transition) {
             for (place, connection) in vals.iter() {
-                if !self.place_matches_requirement(place.as_ref(), connection.as_ref()) {
+                let tokens = place.tokens();
+
+                let enabled = match connection.connection_type() {
+                    super::ConnectionType::NORMAL => connection.weight() <= &tokens,
+                    super::ConnectionType::INHIBITOR => connection.weight() > &tokens,
+                    super::ConnectionType::RESET => true,
+                };
+
+                if !enabled {
                     return false;
                 }
             }
@@ -187,6 +186,51 @@ impl Simulation {
                 place.add_tokens(connection.weight().clone());
             }
         }
+    }
+
+    /// Prints interactive prompt and returns true when the user wants to cancel the execution,
+    /// otherwise returns false.
+    fn interactive_print(&self) -> bool {
+        let should_cancel;
+
+        self.print_table();
+
+        execute!(
+            stdout(),
+            Print("Press "),
+            SetForegroundColor(Color::Magenta),
+            Print("ENTER"),
+            ResetColor,
+            Print(" to execute the next step, or "),
+            SetForegroundColor(Color::Red),
+            Print("c"),
+            ResetColor,
+            Print(" to cancel the simulation.\n"),
+        )
+        .expect("Failed to setup interactive session");
+
+        enable_raw_mode().expect("Failed to setup interactive session");
+
+        loop {
+            match read().expect("Failed to setup interactive session") {
+                Event::Key(event) => match event.code {
+                    KeyCode::Enter => {
+                        should_cancel = false;
+                        break;
+                    }
+                    KeyCode::Char('c') => {
+                        should_cancel = true;
+                        break;
+                    }
+                    _ => {}
+                },
+                _ => {}
+            }
+        }
+
+        disable_raw_mode().expect("Failed to setup interactive session");
+
+        should_cancel
     }
 
     /// Execute the simulation
@@ -267,39 +311,9 @@ impl Simulation {
 
             // Interactive session
             if self.interactive {
-                self.print_table();
-
-                execute!(
-                    stdout(),
-                    Print("Press "),
-                    SetForegroundColor(Color::Magenta),
-                    Print("ENTER"),
-                    ResetColor,
-                    Print(" to execute the next step, or "),
-                    SetForegroundColor(Color::Red),
-                    Print("c"),
-                    ResetColor,
-                    Print(" to cancel the simulation.\n"),
-                )
-                .expect("Failed to setup interactive session");
-
-                enable_raw_mode().expect("Failed to setup interactive session");
-
-                loop {
-                    match read().expect("Failed to setup interactive session") {
-                        Event::Key(event) => match event.code {
-                            KeyCode::Enter => break,
-                            KeyCode::Char('c') => {
-                                disable_raw_mode().expect("Failed to setup interactive session");
-                                return;
-                            }
-                            _ => {}
-                        },
-                        _ => {}
-                    }
+                if self.interactive_print() {
+                    return;
                 }
-
-                disable_raw_mode().expect("Failed to setup interactive session");
             }
         }
     }

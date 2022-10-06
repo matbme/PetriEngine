@@ -73,6 +73,13 @@ impl PetriNet {
 }
 
 #[macro_export]
+macro_rules! connection_type {
+    (->) => { crate::net::ConnectionType::NORMAL };
+    (-@) => { crate::net::ConnectionType::INHIBITOR };
+    (>>) => { crate::net::ConnectionType::RESET };
+}
+
+#[macro_export]
 macro_rules! petri_net {
     (places $var:ident [ $($name:ident $(< $tokens:literal >)?),+ ]) => {
         $(
@@ -95,12 +102,7 @@ macro_rules! petri_net {
 
     (connections $var:ident [ $( $(( $weight:literal ))? $from:ident $ctype:tt $to:ident ),+ ]) => {
         $(
-            let con_type = match stringify!($ctype) {
-                "->" => crate::net::ConnectionType::NORMAL,
-                "-@" => crate::net::ConnectionType::INHIBITOR,
-                ">>" => crate::net::ConnectionType::RESET,
-                _ => panic!("Invalid connection type")
-            };
+            let con_type = $crate::connection_type!($ctype);
 
             #[allow(unused_variables)]
             let weight: i32 = 1;
