@@ -1,7 +1,14 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::io::stdout;
 use std::rc::Rc;
 
+use crossterm::{
+    event::{read, Event, KeyCode},
+    execute,
+    style::{Color, Print, ResetColor, SetForegroundColor},
+    terminal::{disable_raw_mode, enable_raw_mode},
+};
 use rand::prelude::*;
 
 use super::{Connection, PetriNet, Place, Transition};
@@ -15,14 +22,11 @@ pub type ConcurrencyMap = HashMap<Rc<Place>, Vec<Rc<Connection>>>;
 
 pub struct Simulation {
     net: PetriNet,
-
     incoming_connections: ConnectionMap,
     outgoing_connections: ConnectionMap,
-
     concurrent_connections: ConcurrencyMap,
-
-    // Store a log of each step for printing
-    ui_rows: RefCell<Vec<Vec<String>>>,
+    ui_rows: RefCell<Vec<Vec<String>>>, // Store a log of each step for printing
+    interactive: bool,                  // Whether user confirmation is required to advance
 }
 
 impl UITable for Simulation {
@@ -46,6 +50,7 @@ impl UITable for Simulation {
 }
 
 impl Simulation {
+    /// Create a new `Simulation` with the provided `net`.
     pub fn new(net: PetriNet) -> Self {
         let mut simul = Self {
             net,
@@ -53,6 +58,25 @@ impl Simulation {
             outgoing_connections: HashMap::new(),
             concurrent_connections: HashMap::new(),
             ui_rows: RefCell::new(vec![]),
+            interactive: false,
+        };
+
+        simul.scan_connections();
+        simul.check_concurrency();
+
+        simul
+    }
+
+    /// Create a new interactive `Simulation` with the provided `net`. An interactive simulation
+    /// requires the user to press *ENTER* to advance cycles.
+    pub fn new_interactive(net: PetriNet) -> Self {
+        let mut simul = Self {
+            net,
+            incoming_connections: HashMap::new(),
+            outgoing_connections: HashMap::new(),
+            concurrent_connections: HashMap::new(),
+            ui_rows: RefCell::new(vec![]),
+            interactive: true,
         };
 
         simul.scan_connections();
@@ -163,6 +187,7 @@ impl Simulation {
         }
     }
 
+    /// Execute the simulation
     pub fn run(&self) {
         let mut some_transition_enabled = true;
         let mut cycle_count = -1;
@@ -207,6 +232,7 @@ impl Simulation {
                 }
             }
 
+            // Run cycle
             for transition in self.net.transitions().iter() {
                 if enabled_transitions.contains(transition) {
                     some_transition_enabled = true;
@@ -235,8 +261,44 @@ impl Simulation {
                     }
                 },
             )));
-
             self.ui_rows.borrow_mut().push(table_row.clone());
+
+            // Interactive session
+            if self.interactive {
+                self.print_table();
+
+                execute!(
+                    stdout(),
+                    Print("Press "),
+                    SetForegroundColor(Color::Magenta),
+                    Print("ENTER"),
+                    ResetColor,
+                    Print(" to execute the next step, or "),
+                    SetForegroundColor(Color::Red),
+                    Print("c"),
+                    ResetColor,
+                    Print(" to cancel the simulation.\n"),
+                )
+                .expect("Failed to setup interactive session");
+
+                enable_raw_mode().expect("Failed to setup interactive session");
+
+                loop {
+                    match read().expect("Failed to setup interactive session") {
+                        Event::Key(event) => match event.code {
+                            KeyCode::Enter => break,
+                            KeyCode::Char('c') => {
+                                disable_raw_mode().expect("Failed to setup interactive session");
+                                return;
+                            }
+                            _ => {}
+                        },
+                        _ => {}
+                    }
+                }
+
+                disable_raw_mode().expect("Failed to setup interactive session");
+            }
         }
     }
 }
