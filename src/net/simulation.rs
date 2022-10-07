@@ -255,7 +255,6 @@ impl Simulation {
                     enabled_transitions.push(transition.clone());
                 }
             }
-            println!("{:?}", enabled_transitions);
 
             // Choose path for concurrent connections
             let mut rng = rand::thread_rng();
