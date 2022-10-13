@@ -1,4 +1,3 @@
-use derivative::Derivative;
 use uuid::Uuid;
 
 use std::cell::RefCell;
@@ -10,14 +9,29 @@ use crate::ui::UITable;
 #[derive(Clone, Debug)]
 pub struct TokensInner(i32);
 
-#[derive(Derivative)]
-#[derivative(Debug, Eq, Hash)]
 pub struct Place {
     id: Uuid,
     name: String,
 
-    #[derivative(Hash = "ignore")]
     tokens: RefCell<TokensInner>,
+}
+
+impl std::fmt::Debug for Place {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Place")
+            .field("id", &self.id)
+            .field("name", &self.name)
+            .field("tokens", &self.tokens.borrow().0)
+            .finish()
+    }
+}
+
+impl std::hash::Hash for Place {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+        self.name.hash(state);
+        self.tokens.borrow().0.hash(state);
+    }
 }
 
 impl PartialEq for Place {
@@ -25,6 +39,8 @@ impl PartialEq for Place {
         self.id == other.id
     }
 }
+
+impl Eq for Place {}
 
 impl UITable for Vec<Rc<Place>> {
     fn header(&self) -> Vec<&str> {

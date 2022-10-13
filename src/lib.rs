@@ -32,25 +32,34 @@ mod tests {
         let start = std::time::Instant::now();
 
         let pn = petri_net! {
-            places => [L1<2>, L2, L3<2>, L4, L5<5>, L6, L7, L8],
-            transitions => [T1 -> |t, _, _| {
-                println!("T1 is active and has ID {}", t.id());
-            }, T2, T3, T4],
+            places => [L1, L2<2>, L3<1>, L4, L5, L6, L7<10>, L8, L9, L10, L11, L12, L13],
+            transitions => [Ta, Tb, Tc, Td, Te, Tf, Tg],
             connections => [
-                L1 -> T1,
-                T1 -> L2,
-                L2 -> T2,
-                T2 -> L4,
-                L4 -> T3,
-                T3 -> L7,
-                T3 -> L6,
-                L7 -> T4,
-                L6 -> T4,
-                T4 -> L8,
-                (2) T3 -> L3,
-                (2) L3 -> T2,
-                (3) T4 -> L5,
-                (3) L5 -> T2
+                (2) L1 -> Ta,
+                Ta -> L4,
+                L4 -> Td,
+                L7 >> Td,
+                Td -> L11,
+                L11 -> Tg,
+                Tg -> L12,
+                Tb -> L1,
+                Tb -> L5,
+                L5 -> Te,
+                Te -> L8,
+                L8 -> Td,
+                L8 -> Tg,
+                Te -> L9,
+                L9 -> Tg,
+                Te -> L10,
+                Tg -> L13,
+                L13 -> Tf,
+                L10 -> Tf,
+                L2 -> Tb,
+                Tf -> L2,
+                Tf -> L6,
+                (2) L6 @ Te,
+                L3 -> Tc,
+                Tc -> L6
             ]
         };
 

@@ -1,4 +1,3 @@
-use derivative::Derivative;
 use uuid::Uuid;
 
 use std::rc::Rc;
@@ -10,26 +9,48 @@ use crate::ui::UITable;
 // `HashMap` expressing the net graph.
 type TransitionCallback = Box<dyn Fn(&Transition, &ConnectionMap, &ConnectionMap)>;
 
-#[derive(Derivative)]
-#[derivative(Debug, Eq, Hash)]
 pub struct Transition {
     id: Uuid,
     name: String,
 
-    #[derivative(Hash = "ignore")]
-    #[derivative(Debug = "ignore")]
     callback: Option<TransitionCallback>,
 }
 
-impl Connectable for Transition {
-    fn connection_title(&self) -> &str {
-        self.name()
+impl std::fmt::Debug for Transition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Transition")
+            .field("id", &self.id)
+            .field("name", &self.name)
+            .field(
+                "callback",
+                if self.callback.is_some() {
+                    &"Some Fn()"
+                } else {
+                    &"None"
+                },
+            )
+            .finish()
+    }
+}
+
+impl std::hash::Hash for Transition {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+        self.name.hash(state);
     }
 }
 
 impl PartialEq for Transition {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
+    }
+}
+
+impl Eq for Transition {}
+
+impl Connectable for Transition {
+    fn connection_title(&self) -> &str {
+        self.name()
     }
 }
 
