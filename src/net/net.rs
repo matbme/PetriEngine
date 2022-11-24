@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::net::*;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct PetriNet {
     places: Vec<Rc<Place>>,
     transitions: Vec<Rc<Transition>>,
